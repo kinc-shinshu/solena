@@ -7,7 +7,7 @@ class App extends React.Component {
     this.baseurl = "http://localhost:8080/notify";
     this.state = {
       id: "",
-      notify: ""
+      messageList: ""
     };
   }
 
@@ -22,8 +22,8 @@ class App extends React.Component {
   getNotify = async () => {
     if (!this.state.id) return;
     const notify = await fetch(`${this.baseurl}/${this.state.id}`)
-      .then(response => response.text());
-    this.setState({ notify });
+      .then(response => response.json());
+    this.setState({ messageList: notify.messageList });
   }
 
   render() {
@@ -31,7 +31,7 @@ class App extends React.Component {
       <div className="App">
         <div className="hero">
           <input className="textbox" type="text" placeholder="id" value={this.state.id} onChange={this.handleChange} />
-          <h1>{this.state.notify}</h1>
+          <h1>{this.state.messageList}</h1>
         </div>
       </div>
     );
