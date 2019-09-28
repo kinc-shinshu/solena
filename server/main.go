@@ -18,11 +18,11 @@ func redisSetMessageList(key string, value []string, c redis.Conn){
 // メッセージの取得
 func redisGetMessageList(key string, c redis.Conn) []string{
 	s, err := redis.Strings(c.Do("LRANGE", key, 0, -1))
-	fmt.Println(s)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	c.Do("DEL", key)
 	return s
 }
 
