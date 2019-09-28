@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 	"github.com/gomodule/redigo/redis"
 	"net/http"
 	"os"
@@ -40,6 +41,9 @@ func main() {
 	redis_c := redisConnection()
 	defer redis_c.Close()
 	r := gin.Default()
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"*"}
+	r.Use(cors.New(corsConfig))
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
