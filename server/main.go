@@ -7,17 +7,22 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"net/http"
 	"os"
+	"time"
 )
 
 // メッセージの格納
-func redisSetMessageList(key string, value []string, c redis.Conn) {
+func redisSetMessageList(key string, value []string, redisPool *redis.Pool) {
+	c := redisPool.Get()
+	defer c.Close()
 	for _, v := range value {
 		c.Do("RPUSH", key, v)
 	}
 }
 
 // メッセージの取得
-func redisGetMessageList(key string, c redis.Conn) []string {
+func redisGetMessageList(key string, redisPool *redis.Pool) []string {
+	c := redisPool.Get()
+	defer c.Close()
 	s, err := redis.Strings(c.Do("LRANGE", key, 0, -1))
 	if err != nil {
 		fmt.Println(err)
@@ -27,23 +32,13 @@ func redisGetMessageList(key string, c redis.Conn) []string {
 	return s
 }
 
-// redis　接続
-func redisConnection() redis.Conn {
-	const IP_PORT = "localhost:6379"
-	c, err := redis.Dial("tcp", IP_PORT)
-	if err != nil {
-		panic(err)
-	}
-	return c
-}
-
 func makeCorsConfig() (corsConfig cors.Config) {
 	corsConfig = cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"*"}
 	return
 }
 
-func RouterSetup(redisC redis.Conn) *gin.Engine {
+func RouterSetup(redisPool *redis.Pool) *gin.Engine {
 	// Gin周り
 	router := gin.Default()
 	router.Use(cors.New(makeCorsConfig()))
@@ -54,7 +49,7 @@ func RouterSetup(redisC redis.Conn) *gin.Engine {
 	})
 	router.GET("/notify/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		res := redisGetMessageList(id, redisC)
+		res := redisGetMessageList(id, redisPool)
 		c.JSON(200, gin.H{
 			"messageList": res,
 		})
@@ -62,17 +57,35 @@ func RouterSetup(redisC redis.Conn) *gin.Engine {
 	router.POST("/notify/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		body := c.PostFormArray("body")
-		redisSetMessageList(id, body, redisC)
+		redisSetMessageList(id, body, redisPool)
 		c.Status(http.StatusOK)
 	})
 	return router
 }
 
+func newRedisPool(server string) *redis.Pool {
+	return &redis.Pool{
+		MaxIdle:     10,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", server)
+			if err != nil {
+				return nil, err
+			}
+			return c, err
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
+	}
+}
+
 func main() {
 	// Redis周り
-	redisC := redisConnection()
-	defer redisC.Close()
+	const IpPort = "localhost:6379"
+	redisPool := newRedisPool(IpPort)
 	// Router周り
-	router := RouterSetup(redisC)
+	router := RouterSetup(redisPool)
 	router.Run()
 }
