@@ -43,31 +43,36 @@ func makeCorsConfig() (corsConfig cors.Config) {
 	return
 }
 
-func main() {
-	// Redis周り
-	redis_c := redisConnection()
-	defer redis_c.Close()
-
+func RouterSetup(redisC redis.Conn) *gin.Engine {
 	// Gin周り
-	r := gin.Default()
-	r.Use(cors.New(makeCorsConfig()))
-	r.GET("/ping", func(c *gin.Context) {
+	router := gin.Default()
+	router.Use(cors.New(makeCorsConfig()))
+	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
-	r.GET("/notify/:id", func(c *gin.Context) {
+	router.GET("/notify/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		res := redisGetMessageList(id, redis_c)
+		res := redisGetMessageList(id, redisC)
 		c.JSON(200, gin.H{
 			"messageList": res,
 		})
 	})
-	r.POST("/notify/:id", func(c *gin.Context) {
+	router.POST("/notify/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		body := c.PostFormArray("body")
-		redisSetMessageList(id, body, redis_c)
+		redisSetMessageList(id, body, redisC)
 		c.Status(http.StatusOK)
 	})
-	r.Run()
+	return router
+}
+
+func main() {
+	// Redis周り
+	redisC := redisConnection()
+	defer redisC.Close()
+	// Router周り
+	router := RouterSetup(redisC)
+	router.Run()
 }
