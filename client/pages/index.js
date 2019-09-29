@@ -3,89 +3,111 @@ import Link from 'next/link'
 import Head from '../components/head'
 import Nav from '../components/nav'
 
-const Home = () => (
-  <div>
-    <Head title="Home" />
-    <Nav />
+class Home extends React.Component {
+  constructor(props) {
+    super(props);
+    this.baseurl = "http://localhost:8080/notify";
+    this.state = {
+      id: "",
+      messageList: "",
+      messageStack: []
+    };
+  }
 
-    <div className="hero">
-      <h1 className="title">Welcome to Next!</h1>
-      <p className="description">
-        To get started, edit <code>pages/index.js</code> and save to reload.
-      </p>
+  componentDidMount() {
+    setInterval(this.postNotify, 1000);
+    // setInterval(this.getNotify, 1000);
+    setTimeout(() => {
+      setInterval(this.getNotify, 1000);
+    }, 100);
+  }
 
-      <div className="row">
-        <Link href="https://github.com/zeit/next.js#getting-started">
-          <a className="card">
-            <h3>Getting Started &rarr;</h3>
-            <p>Learn more about Next on Github and in their examples</p>
-          </a>
-        </Link>
-        <Link href="https://open.segment.com/create-next-app">
-          <a className="card">
-            <h3>Examples &rarr;</h3>
-            <p>
-              Find other example boilerplates on the{' '}
-              <code>create-next-app</code> site
-            </p>
-          </a>
-        </Link>
-        <Link href="https://github.com/segmentio/create-next-app">
-          <a className="card">
-            <h3>Create Next App &rarr;</h3>
-            <p>Was this tool helpful? Let us know how we can improve it</p>
-          </a>
-        </Link>
+  handleChange = (event) => {
+    this.setState({id: event.target.value});
+  }
+
+  getNotify = async () => {
+    if (!this.state.id) return;
+    const notify = await fetch(`${this.baseurl}/${this.state.id}`)
+      .then(response => response.json());
+    this.setState({ messageList: notify.messageList });
+  }
+
+  pushMessage = (message) => {
+    this.state.messageStack.push(message);
+  }
+
+  postNotify = async () => {
+    if (!this.state.id) return;
+    const body = this.state.messageStack.map((m) => `body=${m}`).join("&");
+    this.setState({ messageStack: [] });
+    const status = await fetch(`${this.baseurl}/${this.state.id}`, {
+      body,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      method: "POST"
+    }).then(response => response.status);
+    console.log(status);
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <div className="hero">
+          <input className="textbox" type="text" placeholder="id" value={this.state.id} onChange={this.handleChange} />
+          <h1>{this.state.messageList}</h1>
+          <button className="btn" onClick={
+            () => {this.state.messageStack.push("Good")}
+          }>Good</button>
+          <button className="btn" onClick={
+            () => {this.state.messageStack.push("Bad")}
+          }>Bad</button>
+        </div>
+        <style jsx>{`
+          .App {
+            text-align: center;
+          }
+
+          .hero {
+            background-color: #282c34;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(10px + 2vmin);
+            color: white;
+          }
+
+          .textbox {
+            font-size: 30px;
+            background-color: #282c34;
+            border-color: white;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 5px;
+            height: 40px;
+            padding: 5px;
+            color: white;
+          }
+
+          .btn {
+            font-size: 30px;
+            background-color: #282c34;
+            border-color: white;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 5px;
+            height: 50px;
+            padding: 10px;
+            margin: 5px;
+            color: white;
+          }
+        `}</style>
       </div>
-    </div>
-
-    <style jsx>{`
-      .hero {
-        width: 100%;
-        color: #333;
-      }
-      .title {
-        margin: 0;
-        width: 100%;
-        padding-top: 80px;
-        line-height: 1.15;
-        font-size: 48px;
-      }
-      .title,
-      .description {
-        text-align: center;
-      }
-      .row {
-        max-width: 880px;
-        margin: 80px auto 40px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-      .card {
-        padding: 18px 18px 24px;
-        width: 220px;
-        text-align: left;
-        text-decoration: none;
-        color: #434343;
-        border: 1px solid #9b9b9b;
-      }
-      .card:hover {
-        border-color: #067df7;
-      }
-      .card h3 {
-        margin: 0;
-        color: #067df7;
-        font-size: 18px;
-      }
-      .card p {
-        margin: 0;
-        padding: 12px 0 0;
-        font-size: 13px;
-        color: #333;
-      }
-    `}</style>
-  </div>
-)
+    );
+  }
+}
 
 export default Home
