@@ -11,13 +11,13 @@ const View = () => {
 
   const getNotify = async (id) => {
     if (id === undefined) return
-    const baseurl = "http://localhost:8080"
+    const baseurl = "http://localhost:8080/notify"
     const notify = await fetch(`${baseurl}/${id}`)
-      .then(response => response.json());
-    setList(notify.messageList);
+      .then(response => response.json())
+    setList(notify.messageList)
   }
 
-  setInterval(() => { getNotify(id) }, 1000);
+  setInterval(() => { getNotify(id) }, 1000)
   return (
     <div className="App">
       <div className="hero">
