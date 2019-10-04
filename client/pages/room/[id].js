@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from '../../components/head'
@@ -8,6 +8,14 @@ const Room = () => {
   const router = useRouter()
   const { id } = router.query
   const [queue, setQueue] = useState([])
+
+  useEffect(() => {
+    // when component did mount
+    return (() => {
+      // when component will unmount
+      clearInterval(postNotifyTimer)
+    })
+  })
 
   const postNotify = async () => {
     if (id === undefined) return;
@@ -24,7 +32,7 @@ const Room = () => {
     console.log(status);
   }
 
-  setInterval(() => { postNotify(id) }, 1000)
+  const postNotifyTimer = setInterval(() => { postNotify(id) }, 1000)
   return (
     <div className="App">
       <div className="hero">

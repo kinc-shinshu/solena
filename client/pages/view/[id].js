@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from '../../components/head'
@@ -9,6 +9,14 @@ const View = () => {
   const { id } = router.query
   const [list, setList] = useState(". . .")
 
+  useEffect(() => {
+    // when component did mount
+    return (() => {
+      // when component will unmount
+      clearInterval(getNotifyTimer)
+    })
+  })
+
   const getNotify = async (id) => {
     if (id === undefined) return
     const baseurl = "http://localhost:8080/notify"
@@ -17,7 +25,7 @@ const View = () => {
     setList(notify.messageList)
   }
 
-  setInterval(() => { getNotify(id) }, 1000)
+  const getNotifyTimer = setInterval(() => { getNotify(id) }, 1000)
   return (
     <div className="App">
       <div className="hero">
