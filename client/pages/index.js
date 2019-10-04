@@ -5,50 +5,15 @@ import Nav from '../components/nav'
 
 class Home extends React.Component {
   constructor(props) {
-    super(props);
-    this.baseurl = "http://localhost:8080/notify";
+    super(props)
+    this.baseurl = "http://localhost:8080/notify"
     this.state = {
-      id: "",
-      messageList: "",
-      messageStack: []
-    };
-  }
-
-  componentDidMount() {
-    setInterval(this.postNotify, 1000);
-    // setInterval(this.getNotify, 1000);
-    setTimeout(() => {
-      setInterval(this.getNotify, 1000);
-    }, 100);
+      id: ""
+    }
   }
 
   handleChange = (event) => {
-    this.setState({id: event.target.value});
-  }
-
-  getNotify = async () => {
-    if (!this.state.id) return;
-    const notify = await fetch(`${this.baseurl}/${this.state.id}`)
-      .then(response => response.json());
-    this.setState({ messageList: notify.messageList });
-  }
-
-  pushMessage = (message) => {
-    this.state.messageStack.push(message);
-  }
-
-  postNotify = async () => {
-    if (!this.state.id) return;
-    const body = this.state.messageStack.map((m) => `body=${m}`).join("&");
-    this.setState({ messageStack: [] });
-    const status = await fetch(`${this.baseurl}/${this.state.id}`, {
-      body,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      method: "POST"
-    }).then(response => response.status);
-    console.log(status);
+    this.setState({id: event.target.value})
   }
 
   render() {
@@ -57,12 +22,12 @@ class Home extends React.Component {
         <div className="hero">
           <input className="textbox" type="text" placeholder="id" value={this.state.id} onChange={this.handleChange} />
           <h1>{this.state.messageList}</h1>
-          <button className="btn" onClick={
-            () => {this.state.messageStack.push("Good")}
-          }>Good</button>
-          <button className="btn" onClick={
-            () => {this.state.messageStack.push("Bad")}
-          }>Bad</button>
+          <Link href="/view/[id]" as={`/view/${this.state.id}`}>
+            <a className="btn">VIEW PAGE</a>
+          </Link>
+          <Link href="/room/[id]" as={`/room/${this.state.id}`}>
+            <a className="btn">PUSH PAGE</a>
+          </Link>
         </div>
         <style jsx>{`
           .App {
