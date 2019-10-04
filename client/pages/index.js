@@ -1,26 +1,32 @@
-import React from 'react'
-import Link from 'next/link'
-import Head from '../components/head'
-import Nav from '../components/nav'
+import React from "react";
+import Link from "next/link";
+import Head from "../components/head";
+import Nav from "../components/nav";
 
 class Home extends React.Component {
   constructor(props) {
-    super(props)
-    this.baseurl = "http://localhost:8080/notify"
+    super(props);
+    this.baseurl = "http://localhost:8080/notify";
     this.state = {
       id: ""
-    }
+    };
   }
 
-  handleChange = (event) => {
-    this.setState({id: event.target.value})
-  }
+  handleChange = event => {
+    this.setState({ id: event.target.value });
+  };
 
   render() {
     return (
       <div className="App">
         <div className="hero">
-          <input className="textbox" type="text" placeholder="id" value={this.state.id} onChange={this.handleChange} />
+          <input
+            className="textbox"
+            type="text"
+            placeholder="id"
+            value={this.state.id}
+            onChange={this.handleChange}
+          />
           <h1>{this.state.messageList}</h1>
           <Link href="/view/[id]" as={`/view/${this.state.id}`}>
             <a className="btn">VIEW PAGE</a>
@@ -75,4 +81,4 @@ class Home extends React.Component {
   }
 }
 
-export default Home
+export default Home;
