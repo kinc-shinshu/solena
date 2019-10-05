@@ -52,6 +52,7 @@ const Room = () => {
   return (
     <Layout>
       <Hero>
+        <Head title={`Room (ID: ${id})`} />
         <h1>ID: {id}</h1>
         <button className="btn" onClick={pushGoodButton}>
           👍

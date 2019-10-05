@@ -36,6 +36,7 @@ const View = () => {
   return (
     <Layout>
       <Hero>
+        <Head title={`View (ID: ${id})`} />
         <h1>ID: {id}</h1>
         <div className="message-area">
           <p>{list}</p>
