@@ -1,82 +1,42 @@
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "../../components/head";
-import Nav from "../../components/nav";
+import Layout from "../../components/layout";
+import Hero from "../../components/hero";
 
 const View = () => {
-  const router = useRouter();
-  const { id } = router.query;
+  // get url query parameters
+  const { id } = useRouter().query;
+
   const [list, setList] = useState(". . .");
+
+  const getNotify = async id => {
+    const path = `${process.env.apiUrl}/notify/${id}`;
+    const response = await fetch(path);
+    const json = await response.json();
+    // console.log(json.messageList);
+    setList(json.messageList);
+  };
 
   useEffect(() => {
     // when component did mount
+    const getNotifyTimer = setInterval(() => {
+      getNotify(id);
+    }, 1000);
     return () => {
       // when component will unmount
       clearInterval(getNotifyTimer);
     };
   });
 
-  const getNotify = async id => {
-    if (id === undefined) return;
-    const path = `${process.env.apiUrl}/notify/${id}`;
-    const notify = await fetch(path).then(response =>
-      response.json()
-    );
-    setList(notify.messageList);
-  };
-
-  const getNotifyTimer = setInterval(() => {
-    getNotify(id);
-  }, 1000);
   return (
-    <div className="App">
-      <div className="hero">
+    <Layout>
+      <Hero>
         <h1>ID: {id}</h1>
         <h1>{list}</h1>
-      </div>
-      <style jsx>{`
-        .App {
-          text-align: center;
-        }
-
-        .hero {
-          background-color: #282c34;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          font-size: calc(10px + 2vmin);
-          color: white;
-        }
-
-        .textbox {
-          font-size: 30px;
-          background-color: #282c34;
-          border-color: white;
-          border-style: solid;
-          border-width: 1px;
-          border-radius: 5px;
-          height: 40px;
-          padding: 5px;
-          color: white;
-        }
-
-        .btn {
-          font-size: 30px;
-          background-color: #282c34;
-          border-color: white;
-          border-style: solid;
-          border-width: 1px;
-          border-radius: 5px;
-          height: 50px;
-          padding: 10px;
-          margin: 5px;
-          color: white;
-        }
-      `}</style>
-    </div>
+      </Hero>
+      <style jsx>{``}</style>
+    </Layout>
   );
 };
 

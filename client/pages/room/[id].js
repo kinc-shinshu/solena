@@ -1,89 +1,66 @@
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "../../components/head";
-import Nav from "../../components/nav";
+import Layout from "../../components/layout";
+import Hero from "../../components/hero";
 
 const Room = () => {
-  const router = useRouter();
-  const { id } = router.query;
+  // get url query parameters
+  const { id } = useRouter().query;
+
   const [queue, setQueue] = useState([]);
+
+  const postNotify = async () => {
+    if (queue.length === 0) return;
+    const path = `${process.env.apiUrl}/notify/${id}`;
+    // create a request body like the following
+    /*
+      body=XXX&body=YYY&body=ZZZ
+    */
+    const body = queue.map(m => `body=${m}`).join("&");
+    setQueue([]);
+    const response = await fetch(path, {
+      body,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      method: "POST"
+    });
+    const status = await response.status;
+    // console.log(status);
+  };
+
+  const pushGoodButton = () => {
+    queue.push("Good");
+  };
+
+  const pushBadButton = () => {
+    queue.push("Bad");
+  };
 
   useEffect(() => {
     // when component did mount
+    const postNotifyTimer = setInterval(() => {
+      postNotify(id);
+    }, 1000);
     return () => {
       // when component will unmount
       clearInterval(postNotifyTimer);
     };
   });
 
-  const postNotify = async () => {
-    if (id === undefined) return;
-    const path = `${process.env.apiUrl}/notify/${id}`;
-    const body = queue.map(m => `body=${m}`).join("&");
-    setQueue([]);
-    const status = await fetch(path, {
-      body,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      method: "POST"
-    }).then(response => response.status);
-    console.log(status);
-  };
-
-  const postNotifyTimer = setInterval(() => {
-    postNotify(id);
-  }, 1000);
   return (
-    <div className="App">
-      <div className="hero">
+    <Layout>
+      <Hero>
         <h1>ID: {id}</h1>
-        <button
-          className="btn"
-          onClick={() => {
-            queue.push("Good");
-          }}
-        >
+        <button className="btn" onClick={pushGoodButton}>
           Good
         </button>
-        <button
-          className="btn"
-          onClick={() => {
-            queue.push("Bad");
-          }}
-        >
+        <button className="btn" onClick={pushBadButton}>
           Bad
         </button>
-      </div>
+      </Hero>
       <style jsx>{`
-        .App {
-          text-align: center;
-        }
-
-        .hero {
-          background-color: #282c34;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          font-size: calc(10px + 2vmin);
-          color: white;
-        }
-
-        .textbox {
-          font-size: 30px;
-          background-color: #282c34;
-          border-color: white;
-          border-style: solid;
-          border-width: 1px;
-          border-radius: 5px;
-          height: 40px;
-          padding: 5px;
-          color: white;
-        }
-
         .btn {
           font-size: 30px;
           background-color: #282c34;
@@ -97,7 +74,7 @@ const Room = () => {
           color: white;
         }
       `}</style>
-    </div>
+    </Layout>
   );
 };
 
