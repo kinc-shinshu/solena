@@ -19,10 +19,10 @@ const Room = () => {
 
   const postNotify = async () => {
     if (id === undefined) return;
-    const baseurl = "http://localhost:8080/notify";
+    const path = `${process.env.apiUrl}/notify/${id}`;
     const body = queue.map(m => `body=${m}`).join("&");
     setQueue([]);
-    const status = await fetch(`${baseurl}/${id}`, {
+    const status = await fetch(path, {
       body,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"

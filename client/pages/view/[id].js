@@ -19,8 +19,8 @@ const View = () => {
 
   const getNotify = async id => {
     if (id === undefined) return;
-    const baseurl = "http://localhost:8080/notify";
-    const notify = await fetch(`${baseurl}/${id}`).then(response =>
+    const path = `${process.env.apiUrl}/notify/${id}`;
+    const notify = await fetch(path).then(response =>
       response.json()
     );
     setList(notify.messageList);

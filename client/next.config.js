@@ -6,5 +6,8 @@ module.exports = {
     };
 
     return config;
+  },
+  env: {
+    apiUrl: "http://localhost:8080"
   }
 };
