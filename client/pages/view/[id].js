@@ -8,14 +8,18 @@ const View = () => {
   // get url query parameters
   const { id } = useRouter().query;
 
-  const [list, setList] = useState(". . .");
+  const [list, setList] = useState("waiting...");
 
   const getNotify = async id => {
     const path = `${process.env.apiUrl}/notify/${id}`;
     const response = await fetch(path);
     const json = await response.json();
-    // console.log(json.messageList);
-    setList(json.messageList);
+    console.log(json.messageList);
+    if (json.messageList.length === 0) {
+      setList("waiting...");
+    } else {
+      setList(json.messageList);
+    }
   };
 
   useEffect(() => {
@@ -33,9 +37,23 @@ const View = () => {
     <Layout>
       <Hero>
         <h1>ID: {id}</h1>
-        <h1>{list}</h1>
+        <div className="message-area">
+          <p>{list}</p>
+        </div>
       </Hero>
-      <style jsx>{``}</style>
+      <style jsx>{`
+        .message-area {
+          background: #384040;
+          width: 100%;
+          height: 80px;
+          padding: 10px;
+        }
+
+        .message-area p {
+          font-size: 60px;
+          display: inline;
+        }
+      `}</style>
     </Layout>
   );
 };

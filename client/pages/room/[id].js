@@ -31,11 +31,11 @@ const Room = () => {
   };
 
   const pushGoodButton = () => {
-    queue.push("Good");
+    queue.push("👍");
   };
 
   const pushBadButton = () => {
-    queue.push("Bad");
+    queue.push("👎");
   };
 
   useEffect(() => {
@@ -54,10 +54,10 @@ const Room = () => {
       <Hero>
         <h1>ID: {id}</h1>
         <button className="btn" onClick={pushGoodButton}>
-          Good
+          👍
         </button>
         <button className="btn" onClick={pushBadButton}>
-          Bad
+          👎
         </button>
       </Hero>
       <style jsx>{`
