@@ -1,4 +1,5 @@
 import React from "react";
+import { node } from "prop-types";
 
 const Layout = ({ children }) => (
   <div className="App">
@@ -17,5 +18,9 @@ const Layout = ({ children }) => (
     `}</style>
   </div>
 );
+
+Layout.propTypes = {
+  children: node.isRequired,
+};
 
 export default Layout;

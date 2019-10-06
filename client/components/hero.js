@@ -1,4 +1,5 @@
 import React from "react";
+import { node } from "prop-types";
 
 const Hero = ({ children }) => (
   <div className="hero">
@@ -16,5 +17,9 @@ const Hero = ({ children }) => (
     `}</style>
   </div>
 );
+
+Hero.propTypes = {
+  children: node.isRequired,
+};
 
 export default Hero;

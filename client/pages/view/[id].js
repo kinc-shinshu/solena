@@ -14,7 +14,7 @@ const View = () => {
     const path = `${process.env.apiUrl}/notify/${id}`;
     const response = await fetch(path);
     const json = await response.json();
-    console.log(json.messageList);
+    // console.log(json.messageList);
     if (json.messageList.length === 0) {
       setList("waiting...");
     } else {
