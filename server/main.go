@@ -83,8 +83,12 @@ func newRedisPool(server string) *redis.Pool {
 
 func main() {
 	// Redis周り
-	const IpPort = "localhost:6379"
-	redisPool := newRedisPool(IpPort)
+	redisCloudURL := os.Getenv("REDISCLOUD_URL")
+	if redisCloudURL == "" {
+		redisCloudURL = "localhost:6379"
+	}
+	redisPool := newRedisPool(redisCloudURL)
+
 	// Router周り
 	router := RouterSetup(redisPool)
 	router.Run()
