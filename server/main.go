@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
@@ -63,7 +64,7 @@ func RouterSetup(redisPool *redis.Pool) *gin.Engine {
 	return router
 }
 
-func newRedisPool(server string) *redis.Pool {
+func newRedisPool(server string, password string) *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     10,
 		IdleTimeout: 240 * time.Second,
@@ -72,6 +73,12 @@ func newRedisPool(server string) *redis.Pool {
 			if err != nil {
 				return nil, err
 			}
+
+			if _, err := c.Do("AUTH", password); err != nil {
+				c.Close()
+				return nil, err
+			}
+
 			return c, err
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
@@ -82,12 +89,20 @@ func newRedisPool(server string) *redis.Pool {
 }
 
 func main() {
-	// Redis周り
 	redisCloudURL := os.Getenv("REDISCLOUD_URL")
+	redisServer := ""
+	password := ""
+
+	// Heroku addon "Redis Cloud" からURLおよびパスワードを抜き出す
+	// 開発環境である場合、 localhost を返す
 	if redisCloudURL == "" {
-		redisCloudURL = "localhost:6379"
+		redisServer = "localhost:6379"
+	} else {
+		redisCloudInfo, _ := url.Parse(redisCloudURL)
+		redisServer = redisCloudInfo.Host
+		password, _ = redisCloudInfo.User.Password()
 	}
-	redisPool := newRedisPool(redisCloudURL)
+	redisPool := newRedisPool(redisServer, password)
 
 	// Router周り
 	router := RouterSetup(redisPool)
